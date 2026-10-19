@@ -1,0 +1,343 @@
+<title>판교세븐 구내식당</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Do+Hyeon&family=IBM+Plex+Sans+KR:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+/* 레이아웃: 상단 요일 스트립 → 선택한 날의 끼니를 위에서 아래로 (조식·중식 코너 그리드·석식). 지금 배식 중인 끼니만 강조. */
+:root {
+  --bg: #eef1ee;          /* 스테인리스 식판 톤의 옅은 세이지 그레이 */
+  --surface: #ffffff;
+  --ink: #1a201c;
+  --muted: #5b655e;
+  --line: #d7ddd8;
+  --accent: #1d6b57;      /* 시금치 그린 */
+  --accent-soft: #dcebe5;
+  --yolk: #f0b000;        /* 계란 노른자: '지금' 표시 */
+  --yolk-ink: #3a2a00;
+  --closed: #9aa39c;
+  --display: "Do Hyeon", "Black Han Sans", "Malgun Gothic", "Apple SD Gothic Neo", sans-serif;
+  --body: "IBM Plex Sans KR", "Malgun Gothic", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, "Consolas", monospace;
+  --r: 14px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #121614; --surface: #1b211e; --ink: #e6ece8; --muted: #9aa69f; --line: #2c3530;
+    --accent: #6cc4a6; --accent-soft: #1f3a31; --yolk: #f5c24a; --yolk-ink: #2a1e00; --closed: #5f6a64;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #121614; --surface: #1b211e; --ink: #e6ece8; --muted: #9aa69f; --line: #2c3530;
+  --accent: #6cc4a6; --accent-soft: #1f3a31; --yolk: #f5c24a; --yolk-ink: #2a1e00; --closed: #5f6a64;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body {
+  margin: 0; background: var(--bg); color: var(--ink);
+  font: 15px/1.55 var(--body); -webkit-font-smoothing: antialiased;
+}
+.wrap { max-width: 1040px; margin: 0 auto; padding-inline: 16px; padding-block: 18px 48px; display: grid; gap: 18px; }
+
+/* 머리 */
+header { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 8px 16px; }
+h1 { font: 400 1.9rem/1.1 var(--display); margin: 0; letter-spacing: -0.01em; }
+h1 small { display: block; font: 500 .78rem/1.4 var(--body); color: var(--muted); letter-spacing: .02em; margin-bottom: 2px; }
+.weeknav { display: flex; align-items: center; gap: 6px; font-size: .9rem; color: var(--muted); }
+.weeknav b { color: var(--ink); font-weight: 600; white-space: nowrap; }
+.iconbtn {
+  border: 1px solid var(--line); background: var(--surface); color: var(--ink); border-radius: 999px;
+  width: 32px; height: 32px; display: grid; place-items: center; cursor: pointer; font: 600 1rem var(--body);
+}
+.iconbtn:disabled { opacity: .35; cursor: default; }
+.toggle { border: 1px solid var(--line); background: var(--surface); color: var(--ink); border-radius: 999px; padding: 5px 12px; font: 500 .85rem var(--body); cursor: pointer; }
+.toggle[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+:is(button, a, summary):focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* 요일 스트립 */
+.days { display: grid; grid-template-columns: repeat(var(--n, 5), minmax(0, 1fr)); gap: 6px; }
+.day {
+  border: 1px solid var(--line); background: var(--surface); color: var(--ink); border-radius: 12px;
+  padding: 8px 4px 9px; cursor: pointer; display: grid; justify-items: center; gap: 1px; position: relative;
+  font-family: var(--body);
+}
+.day .wd { font: 400 1.25rem/1 var(--display); }
+.day .dt { font: 500 .78rem var(--mono); color: var(--muted); font-variant-numeric: tabular-nums; }
+.day .tag { font-size: .68rem; color: var(--closed); height: 1em; line-height: 1; }
+.day.is-closed .wd { color: var(--closed); }
+.day.is-today .tag { color: var(--accent); font-weight: 600; }
+.day[aria-selected="true"] { background: var(--accent); border-color: var(--accent); color: var(--surface); }
+.day[aria-selected="true"] :is(.dt, .tag, .wd) { color: var(--surface); }
+
+/* 끼니 */
+.meals { display: grid; gap: 14px; }
+.meal { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 16px 18px 18px; display: grid; gap: 12px; }
+.meal.is-now { border-color: var(--yolk); box-shadow: 0 0 0 2px var(--yolk) inset; }
+.meal-head { display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px 12px; }
+.meal-head h2 { margin: 0; font: 400 1.45rem/1 var(--display); }
+.time { font: 500 .85rem var(--mono); color: var(--muted); font-variant-numeric: tabular-nums; }
+.chip { font-size: .72rem; font-weight: 600; padding: 2px 8px; border-radius: 999px; background: var(--yolk); color: var(--yolk-ink); letter-spacing: .02em; }
+.chip.next { background: var(--accent-soft); color: var(--accent); }
+.chip.off { background: transparent; color: var(--closed); border: 1px dashed var(--closed); }
+
+.corners { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 10px; }
+.corner { display: grid; gap: 6px; align-content: start; min-width: 0; }
+.corners .corner { border-top: 1px solid var(--line); padding-top: 10px; }
+.corner-name { font: 600 .72rem var(--body); letter-spacing: .08em; text-transform: uppercase; color: var(--accent); }
+.main { font: 400 1.35rem/1.25 var(--display); word-break: keep-all; }
+.sides { margin: 0; padding: 0; list-style: none; display: flex; flex-wrap: wrap; gap: 2px 0; color: var(--muted); font-size: .92rem; word-break: keep-all; }
+.sides li:not(:last-child)::after { content: "·"; margin: 0 7px; color: var(--line); }
+.corner.is-off .main { color: var(--closed); font-size: 1.05rem; }
+
+.stale { background: var(--yolk); color: var(--yolk-ink); border-radius: 10px; padding: 10px 14px; font-size: .9rem; line-height: 1.5; }
+.stale b { font-weight: 600; }
+
+.closed-card { background: var(--surface); border: 1px dashed var(--closed); border-radius: var(--r); padding: 36px 18px; text-align: center; display: grid; gap: 6px; }
+.closed-card strong { font: 400 1.6rem var(--display); color: var(--muted); }
+.closed-card span { color: var(--muted); }
+
+/* 주간 표 */
+.weekgrid-wrap { overflow-x: auto; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); }
+.weekgrid { border-collapse: collapse; width: 100%; min-width: 760px; font-size: .86rem; }
+.weekgrid th, .weekgrid td { border-bottom: 1px solid var(--line); padding: 9px 10px; vertical-align: top; text-align: left; }
+.weekgrid thead th { font: 400 1.05rem var(--display); background: var(--surface); position: sticky; top: 0; }
+.weekgrid thead th.is-today { color: var(--accent); }
+.weekgrid tbody th { font-weight: 600; white-space: nowrap; color: var(--muted); font-size: .78rem; width: 84px; }
+.weekgrid td .m { font: 400 1rem/1.25 var(--display); color: var(--ink); display: block; margin-bottom: 2px; word-break: keep-all; }
+.weekgrid td { color: var(--muted); word-break: keep-all; }
+.weekgrid td.is-today { background: var(--accent-soft); }
+.weekgrid td.off { color: var(--closed); text-align: center; vertical-align: middle; }
+
+/* 바닥 */
+footer { display: grid; gap: 10px; color: var(--muted); font-size: .82rem; }
+.takeout { background: var(--accent-soft); color: var(--ink); border-radius: 10px; padding: 10px 14px; font-size: .88rem; }
+.takeout b { color: var(--accent); margin-right: 6px; }
+details summary { cursor: pointer; }
+details p { margin: 6px 0 0; }
+footer a { color: var(--accent); }
+.meta { display: flex; flex-wrap: wrap; gap: 4px 14px; }
+
+@media (max-width: 520px) {
+  h1 { font-size: 1.6rem; }
+  .meal { padding: 14px 14px 16px; }
+  .main { font-size: 1.25rem; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .meals > * { animation: rise .25s ease-out both; }
+  @keyframes rise { from { transform: translateY(4px); } to { transform: none; } }
+}
+</style>
+
+<div class="wrap">
+  <header>
+    <h1><small>판교세븐벤처밸리 1단지</small>구내식당 식단</h1>
+    <div class="weeknav">
+      <button class="iconbtn" id="prevWeek" aria-label="지난주">‹</button>
+      <b id="weekLabel"></b>
+      <button class="iconbtn" id="nextWeek" aria-label="다음 주">›</button>
+      <button class="toggle" id="viewToggle" aria-pressed="false">주간 표</button>
+    </div>
+  </header>
+
+  <div class="stale" id="stale" role="status" hidden></div>
+  <nav class="days" id="days" role="tablist" aria-label="요일"></nav>
+  <main id="view"></main>
+
+  <footer>
+    <div id="extras"></div>
+    <details id="notesBox"><summary>원산지 표시</summary><div id="notes"></div></details>
+    <div class="meta" id="meta"></div>
+  </footer>
+</div>
+
+<script>
+const DATA = /*__MENU_DATA__*/null;
+
+const $ = (s) => document.querySelector(s);
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const pretty = (s) => esc(s).replace(/\*/g, " + ");
+const pad = (n) => String(n).padStart(2, "0");
+const iso = (d) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+const mins = (hhmm) => { const [h, m] = hhmm.split(":").map(Number); return h * 60 + m; };
+
+const store = {
+  get(k) { try { return localStorage.getItem(k); } catch { return null; } },
+  set(k, v) { try { localStorage.setItem(k, v); } catch {} },
+};
+
+const now = new Date();
+const today = iso(now);
+const nowMin = now.getHours() * 60 + now.getMinutes();
+// 오래된 주차부터 정렬
+const weeks = (DATA?.weeks || []).slice().sort((a, b) => a.days[0].date.localeCompare(b.days[0].date));
+
+function lastMealEnd(day) {
+  const t = day.meals.filter((m) => !m.closed && m.time).map((m) => mins(m.time.split("~")[1]));
+  return t.length ? Math.max(...t) : 0;
+}
+
+// 오늘이 들어 있는 주 → 아니면 오늘 이후 첫 주 → 아니면 가장 최근 주
+function pickStart() {
+  let w = weeks.findIndex((wk) => wk.days.some((d) => d.date === today));
+  if (w < 0) w = weeks.findIndex((wk) => wk.days[0].date > today);
+  if (w < 0) w = weeks.length - 1;
+  const days = weeks[w]?.days || [];
+  // 저녁 배식이 끝났으면 다음 운영일, 주말이면 다음 운영일
+  let d = days.findIndex((x) => x.date === today && !x.closed && nowMin <= lastMealEnd(x));
+  if (d < 0) d = days.findIndex((x) => x.date > today && !x.closed);
+  if (d < 0) d = days.findIndex((x) => x.date >= today);
+  if (d < 0) d = Math.max(0, days.findLastIndex ? days.findLastIndex((x) => !x.closed) : days.length - 1);
+  return { w, d };
+}
+
+const state = { ...pickStart(), view: store.get("pvv.view") === "week" ? "week" : "day" };
+
+function mealStatus(day, meal) {
+  if (meal.closed || !meal.time || day.date !== today) return null;
+  const [s, e] = meal.time.split("~").map(mins);
+  if (nowMin >= s && nowMin <= e) return "now";
+  const upcoming = day.meals.filter((m) => !m.closed && m.time && mins(m.time.split("~")[0]) > nowMin);
+  if (upcoming[0] === meal && !day.meals.some((m) => m.time && !m.closed && nowMin >= mins(m.time.split("~")[0]) && nowMin <= mins(m.time.split("~")[1]))) return "next";
+  return null;
+}
+
+function renderDays() {
+  const wk = weeks[state.w];
+  const el = $("#days");
+  el.style.setProperty("--n", wk.days.length);
+  el.hidden = state.view === "week";
+  el.innerHTML = wk.days.map((d, i) => `
+    <button class="day${d.closed ? " is-closed" : ""}${d.date === today ? " is-today" : ""}" role="tab"
+      id="day-${i}" aria-selected="${i === state.d}" data-i="${i}">
+      <span class="wd">${esc(d.weekday)}</span>
+      <span class="dt">${esc(d.label)}</span>
+      <span class="tag">${d.date === today ? "오늘" : d.closed ? "휴무" : ""}</span>
+    </button>`).join("");
+}
+
+// 대표 메뉴 = 첫 항목. 단, 김치류가 맨 앞에 오면(셀프코너) 그다음 항목을 대표로
+const BANCHAN = /^(포기김치|깍두기|김치|단무지|맛김치)/;
+function split(items) {
+  const i = items.findIndex((t) => !BANCHAN.test(t));
+  if (i <= 0) return [items[0], items.slice(1)];
+  return [items[i], items.filter((_, k) => k !== i)];
+}
+
+function cornerHTML(c) {
+  const [main, sides] = split(c.items);
+  return `<div class="corner${c.closed ? " is-off" : ""}">
+    ${c.name ? `<div class="corner-name">${esc(c.name)}</div>` : ""}
+    <div class="main">${c.closed ? "운영 없음" : pretty(main)}</div>
+    ${!c.closed && sides.length ? `<ul class="sides">${sides.map((s) => `<li>${pretty(s)}</li>`).join("")}</ul>` : ""}
+  </div>`;
+}
+
+function renderDay() {
+  const day = weeks[state.w].days[state.d];
+  if (!day) return "";
+  if (day.closed) {
+    return `<div class="meals"><div class="closed-card"><strong>구내식당 운영 없음</strong>
+      ${day.note.map((n) => `<span>${esc(n)}</span>`).join("")}</div></div>`;
+  }
+  return `<div class="meals">${day.meals.map((m) => {
+    const st = mealStatus(day, m);
+    const chip = m.closed ? `<span class="chip off">운영 없음</span>`
+      : st === "now" ? `<span class="chip">지금 배식 중</span>`
+      : st === "next" ? `<span class="chip next">다음 식사</span>` : "";
+    const multi = m.corners.length > 1;
+    return `<section class="meal${st === "now" ? " is-now" : ""}" aria-label="${esc(m.name)}">
+      <div class="meal-head"><h2>${esc(m.name)}</h2>${m.time ? `<span class="time">${esc(m.time.replace("~", " – "))}</span>` : ""}${chip}</div>
+      ${m.closed ? "" : multi ? `<div class="corners">${m.corners.map(cornerHTML).join("")}</div>` : cornerHTML(m.corners[0])}
+    </section>`;
+  }).join("")}</div>`;
+}
+
+function renderWeek() {
+  const wk = weeks[state.w];
+  // 행: 끼니/코너 조합을 운영일에서 모아 순서 유지
+  const rows = [];
+  wk.days.forEach((d) => d.meals.forEach((m) => {
+    (m.closed ? [{ name: "" }] : m.corners).forEach((c) => {
+      const key = m.name + "|" + c.name;
+      if (!rows.some((r) => r.key === key)) rows.push({ key, meal: m.name, corner: c.name, time: m.time });
+    });
+  }));
+  const cell = (d, r) => {
+    if (d.closed) return null;
+    const m = d.meals.find((x) => x.name === r.meal);
+    if (!m) return `<td></td>`;
+    if (m.closed) return `<td class="off">운영 없음</td>`;
+    const c = m.corners.find((x) => x.name === r.corner);
+    if (!c) return `<td></td>`;
+    if (c.closed) return `<td class="off">운영 없음</td>`;
+    const [main, sides] = split(c.items);
+    return `<td class="${d.date === today ? "is-today" : ""}"><span class="m">${pretty(main)}</span>${sides.map(pretty).join(", ")}</td>`;
+  };
+  const closedShown = new Set();
+  return `<div class="weekgrid-wrap"><table class="weekgrid">
+    <thead><tr><th></th>${wk.days.map((d) => `<th class="${d.date === today ? "is-today" : ""}">${esc(d.weekday)} <span class="time">${esc(d.label)}</span></th>`).join("")}</tr></thead>
+    <tbody>${rows.map((r, ri) => `<tr><th>${esc(r.corner ? r.meal + " " + r.corner : r.meal)}</th>${wk.days.map((d) => {
+      if (!d.closed) return cell(d, r);
+      if (closedShown.has(d.date)) return "";
+      closedShown.add(d.date);
+      return `<td class="off" rowspan="${rows.length}">휴무<br>${d.note.map(esc).join("<br>")}</td>`;
+    }).join("")}</tr>`).join("")}</tbody>
+  </table></div>`;
+}
+
+function renderFooter() {
+  const wk = weeks[state.w];
+  $("#extras").innerHTML = wk.extras.map((e) => `<div class="takeout"><b>${esc(e.name)}</b>${pretty(e.text)}</div>`).join("");
+  $("#notes").innerHTML = wk.notes.map((n) => `<p>${esc(n)}</p>`).join("");
+  $("#notesBox").hidden = !wk.notes.length;
+  const src = wk.source || {};
+  $("#meta").innerHTML = `
+    <span>게시 ${esc(src.posted || "-")}</span>
+    <span>마지막 확인 ${esc((DATA.generated || "").slice(0, 16).replace("T", " "))} (한국 시간)</span>
+    ${src.pdf ? `<a href="${esc(src.pdf)}" target="_blank" rel="noopener">원본 PDF</a>` : ""}
+    <a href="${esc(DATA.list)}" target="_blank" rel="noopener">식단표 게시판</a>`;
+}
+
+function render() {
+  if (!weeks.length) { $("#view").innerHTML = `<div class="closed-card"><strong>식단표를 불러오지 못했습니다</strong></div>`; return; }
+  const wk = weeks[state.w];
+  $("#weekLabel").textContent = (wk.title || "").replace(/\)?\s*주간메뉴안내/, "").trim() || `${wk.days[0].label} 주`;
+  $("#prevWeek").disabled = state.w <= 0;
+  $("#nextWeek").disabled = state.w >= weeks.length - 1;
+  $("#viewToggle").setAttribute("aria-pressed", state.view === "week");
+  renderDays();
+  $("#view").innerHTML = state.view === "week" ? renderWeek() : renderDay();
+  renderFooter();
+  renderStale();
+}
+
+// 서버에서 정기적으로 생성하는 정적 페이지. 적용 날짜가 지난 경우 안내한다.
+// 오늘 만든 페이지인데 다음 주 식단이 없으면 아직 안 올라온 것이므로 경고하지 않는다.
+function renderStale() {
+  const gen = (DATA.generated || "").slice(0, 10);
+  const lastDay = weeks[weeks.length - 1].days.slice(-1)[0].date;
+  const stale = gen && gen < today && lastDay < today;
+  $("#stale").hidden = !stale;
+  if (stale) {
+    const [, m, d] = gen.split("-").map(Number);
+    $("#stale").innerHTML = `<b>${m}/${d}에 받은 식단이라 이번 주 메뉴가 없어요.</b> 새 식단이 아직 게시되지 않았거나 자동 갱신이 지연되고 있어요. 아래 식단표 게시판에서 원본을 확인해 주세요.`;
+  }
+}
+
+$("#days").addEventListener("click", (e) => {
+  const b = e.target.closest(".day"); if (!b) return;
+  state.d = +b.dataset.i; render();
+});
+$("#prevWeek").onclick = () => { state.w--; state.d = 0; render(); };
+$("#nextWeek").onclick = () => { state.w++; state.d = 0; render(); };
+$("#viewToggle").onclick = () => { state.view = state.view === "week" ? "day" : "week"; store.set("pvv.view", state.view); render(); };
+document.addEventListener("keydown", (e) => {
+  if (state.view !== "day" || e.target.closest("input, textarea")) return;
+  const n = weeks[state.w]?.days.length || 0;
+  if (e.key === "ArrowRight" && state.d < n - 1) { state.d++; render(); $("#day-" + state.d)?.focus(); }
+  if (e.key === "ArrowLeft" && state.d > 0) { state.d--; render(); $("#day-" + state.d)?.focus(); }
+});
+
+render();
+</script>

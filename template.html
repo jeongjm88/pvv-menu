@@ -99,10 +99,10 @@ h1 small { display: block; font: 500 .78rem/1.4 var(--body); color: var(--muted)
 
 .featured-badge { display: inline-block; background: #007fa8; color: #fff; font: 600 .74rem/1.5 system-ui, sans-serif; padding: 2px 8px; border-radius: 6px; margin: 0 0 6px; }
 .corner-heading { display: flex; align-items: center; flex-wrap: nowrap; gap: 8px; min-width: 0; height: 24px; box-sizing: border-box; padding: 2px 8px; }
-.corner.is-featured .corner-heading { background: #007fa8; color: #fff; border-radius: 5px; justify-self: start; max-width: 100%; }
-.corner.is-featured .corner-heading .corner-name { color: #fff; }
+.is-featured .corner-heading { background: #007fa8; color: #fff; border-radius: 5px; justify-self: start; max-width: 100%; }
+.is-featured .corner-heading .corner-name { color: #fff; }
 .corner-heading .featured-badge { background: transparent; padding: 0; margin: 0; white-space: nowrap; line-height: 16px; }
-.weekgrid td.is-featured { box-shadow: inset 3px 0 #00b0f0; }
+.weekgrid .corner-heading { display: inline-flex; margin-bottom: 6px; }
 
 /* 주간 표 */
 .weekgrid-wrap { overflow-x: auto; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); }
@@ -272,6 +272,9 @@ function renderWeek() {
       if (!rows.some((r) => r.key === key)) rows.push({ key, meal: m.name, corner: c.name, time: m.time });
     });
   }));
+  rows.forEach((r) => {
+    r.hasFeatured = wk.days.some((d) => d.meals.some((m) => m.name === r.meal && !m.closed && m.corners.some((c) => c.name === r.corner && c.featured && !c.closed)));
+  });
   const cell = (d, r) => {
     if (d.closed) return null;
     const m = d.meals.find((x) => x.name === r.meal);
@@ -281,7 +284,7 @@ function renderWeek() {
     if (!c) return `<td></td>`;
     if (c.closed) return `<td class="off">운영 없음</td>`;
     const [main, sides] = split(c.items);
-    return `<td class="${d.date === today ? "is-today" : ""}${c.featured ? " is-featured" : ""}">${featuredBadge(c)}<span class="m">${pretty(main)}</span>${sides.map(pretty).join(", ")}</td>`;
+    return `<td class="${d.date === today ? "is-today" : ""}${c.featured ? " is-featured" : ""}">${r.hasFeatured ? `<div class="corner-heading">${c.featured ? `<span class="corner-name">${esc(c.name || m.name)}</span>${featuredBadge(c)}` : ""}</div>` : ""}<span class="m">${pretty(main)}</span>${sides.map(pretty).join(", ")}</td>`;
   };
   const closedShown = new Set();
   return `<div class="weekgrid-wrap"><table class="weekgrid">

@@ -132,10 +132,28 @@ def _bands(cuts):
     return list(zip(cuts, cuts[1:]))
 
 
+def _featured_regions(page, lines):
+    """Excel 배지의 숨은 텍스트 좌표 대신 실제 파란 삼각형 위치를 사용한다."""
+    if not any("이달의" in l["t"] for l in lines):
+        return []
+    regions = []
+    for drawing in page.get_drawings():
+        fill = drawing.get("fill")
+        rect = drawing["rect"]
+        if (drawing.get("type") == "f" and fill and len(fill) == 3
+                and fill[0] < .2 and .4 < fill[1] < .85 and fill[2] > .8
+                and 15 < rect.width < 65 and 15 < rect.height < 65
+                and len(drawing["items"]) == 3
+                and all(item[0] == "l" for item in drawing["items"])):
+            regions.append(((rect.x0 + rect.x1) / 2, (rect.y0 + rect.y1) / 2))
+    return regions
+
+
 def parse_pdf(data: bytes, year_hint: int | None = None) -> dict:
     page = fitz.open(stream=data, filetype="pdf")[0]
     lines = _lines(page)
     hl = _hlines(page)
+    featured_regions = _featured_regions(page, lines)
 
     # 날짜 헤더 → 요일 칸
     heads = sorted((l for l in lines if DATE_RE.search(l["t"])), key=lambda l: l["cx"])
@@ -185,7 +203,7 @@ def parse_pdf(data: bytes, year_hint: int | None = None) -> dict:
             continue
         times = [l["t"] for l in sorted(mleft, key=lambda l: l["y0"]) if TIME_RE.match(l["t"])]
         sub_bands = [(t, b) for t, b in _bands(all_cuts) if t >= mt - 2 and b <= mb + 2]
-        body = [l for l in lines if mt < l["cy"] < mb and l["x0"] >= label_right - 2]
+        body = [l for l in lines if mt < l["cy"] < mb and l["x0"] >= label_right - 2 and not JUNK_RE.fullmatch(l["t"])]
 
         # 모든 요일에 걸친 한 줄짜리 행 = 공통 안내 (예: Take Out)
         if not times and body and all(len(cols_of(l)) == len(days) for l in body):
@@ -200,12 +218,14 @@ def parse_pdf(data: bytes, year_hint: int | None = None) -> dict:
             for l in sorted((l for l in body if st < l["cy"] < sb), key=lambda l: (l["y0"], l["x0"])):
                 for i in cols_of(l):
                     cells[i].append(l["t"])
-            meal["corners"].append({"name": corner, "cells": cells})
+            featured = [any(edges[i] <= x < edges[i + 1] and st < y < sb
+                            for x, y in featured_regions) for i in range(len(days))]
+            meal["corners"].append({"name": corner, "cells": cells, "featured": featured})
         meals.append(meal)
 
     for i, day in enumerate(days):
         for m in meals:
-            corners = [{"name": c["name"], "items": c["cells"][i]} for c in m["corners"] if c["cells"][i]]
+            corners = [{"name": c["name"], "items": c["cells"][i], "featured": c["featured"][i]} for c in m["corners"] if c["cells"][i]]
             if not corners:
                 continue
             items = [t for c in corners for t in c["items"]]

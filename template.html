@@ -97,6 +97,10 @@ h1 small { display: block; font: 500 .78rem/1.4 var(--body); color: var(--muted)
 .closed-card strong { font: 400 1.6rem var(--display); color: var(--muted); }
 .closed-card span { color: var(--muted); }
 
+.featured-badge { display: inline-block; background: #007fa8; color: #fff; font: 600 .74rem/1.5 system-ui, sans-serif; padding: 2px 8px; border-radius: 6px; margin: 0 0 6px; }
+.corner.is-featured { border-left: 3px solid #00b0f0; padding-left: 12px; }
+.weekgrid td.is-featured { box-shadow: inset 3px 0 #00b0f0; }
+
 /* 주간 표 */
 .weekgrid-wrap { overflow-x: auto; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); }
 .weekgrid { border-collapse: collapse; width: 100%; min-width: 760px; font-size: .86rem; }
@@ -224,10 +228,13 @@ function split(items) {
   return [items[i], items.filter((_, k) => k !== i)];
 }
 
+function featuredBadge(c) { return c.featured && !c.closed ? `<span class="featured-badge">이달의 메뉴</span>` : ""; }
+
 function cornerHTML(c) {
   const [main, sides] = split(c.items);
-  return `<div class="corner${c.closed ? " is-off" : ""}">
+  return `<div class="corner${c.closed ? " is-off" : ""}${c.featured && !c.closed ? " is-featured" : ""}">
     ${c.name ? `<div class="corner-name">${esc(c.name)}</div>` : ""}
+    ${featuredBadge(c)}
     <div class="main">${c.closed ? "운영 없음" : pretty(main)}</div>
     ${!c.closed && sides.length ? `<ul class="sides">${sides.map((s) => `<li>${pretty(s)}</li>`).join("")}</ul>` : ""}
   </div>`;
@@ -272,7 +279,7 @@ function renderWeek() {
     if (!c) return `<td></td>`;
     if (c.closed) return `<td class="off">운영 없음</td>`;
     const [main, sides] = split(c.items);
-    return `<td class="${d.date === today ? "is-today" : ""}"><span class="m">${pretty(main)}</span>${sides.map(pretty).join(", ")}</td>`;
+    return `<td class="${d.date === today ? "is-today" : ""}${c.featured ? " is-featured" : ""}">${featuredBadge(c)}<span class="m">${pretty(main)}</span>${sides.map(pretty).join(", ")}</td>`;
   };
   const closedShown = new Set();
   return `<div class="weekgrid-wrap"><table class="weekgrid">

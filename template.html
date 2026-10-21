@@ -84,7 +84,7 @@ h1 small { display: block; font: 500 .78rem/1.4 var(--body); color: var(--muted)
 .corners { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 10px; }
 .corner { display: grid; gap: 6px; align-content: start; min-width: 0; }
 .corners .corner { border-top: 1px solid var(--line); padding-top: 10px; }
-.corner-name { font: 600 .72rem var(--body); letter-spacing: .08em; text-transform: uppercase; color: var(--accent); }
+.corner-name { font: 600 .72rem/16px system-ui, sans-serif; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); }
 .main { font: 400 1.35rem/1.25 var(--display); word-break: keep-all; }
 .sides { margin: 0; padding: 0; list-style: none; display: flex; flex-wrap: wrap; gap: 2px 0; color: var(--muted); font-size: .92rem; word-break: keep-all; }
 .sides li:not(:last-child)::after { content: "·"; margin: 0 7px; color: var(--line); }
@@ -98,10 +98,10 @@ h1 small { display: block; font: 500 .78rem/1.4 var(--body); color: var(--muted)
 .closed-card span { color: var(--muted); }
 
 .featured-badge { display: inline-block; background: #007fa8; color: #fff; font: 600 .74rem/1.5 system-ui, sans-serif; padding: 2px 8px; border-radius: 6px; margin: 0 0 6px; }
-.corner-heading { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; min-width: 0; }
-.corner.is-featured .corner-heading { background: #007fa8; color: #fff; border-radius: 6px; padding: 7px 10px; }
+.corner-heading { display: flex; align-items: center; flex-wrap: nowrap; gap: 8px; min-width: 0; height: 24px; box-sizing: border-box; padding: 2px 8px; }
+.corner.is-featured .corner-heading { background: #007fa8; color: #fff; border-radius: 5px; }
 .corner.is-featured .corner-heading .corner-name { color: #fff; }
-.corner-heading .featured-badge { background: transparent; padding: 0; margin: 0; }
+.corner-heading .featured-badge { background: transparent; padding: 0; margin: 0; white-space: nowrap; line-height: 16px; }
 .weekgrid td.is-featured { box-shadow: inset 3px 0 #00b0f0; }
 
 /* 주간 표 */

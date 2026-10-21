@@ -98,7 +98,10 @@ h1 small { display: block; font: 500 .78rem/1.4 var(--body); color: var(--muted)
 .closed-card span { color: var(--muted); }
 
 .featured-badge { display: inline-block; background: #007fa8; color: #fff; font: 600 .74rem/1.5 system-ui, sans-serif; padding: 2px 8px; border-radius: 6px; margin: 0 0 6px; }
-.corner.is-featured { border-left: 3px solid #00b0f0; padding-left: 12px; }
+.corner-heading { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; min-width: 0; }
+.corner.is-featured .corner-heading { background: #007fa8; color: #fff; border-radius: 6px; padding: 7px 10px; }
+.corner.is-featured .corner-heading .corner-name { color: #fff; }
+.corner-heading .featured-badge { background: transparent; padding: 0; margin: 0; }
 .weekgrid td.is-featured { box-shadow: inset 3px 0 #00b0f0; }
 
 /* 주간 표 */
@@ -233,8 +236,7 @@ function featuredBadge(c) { return c.featured && !c.closed ? `<span class="featu
 function cornerHTML(c) {
   const [main, sides] = split(c.items);
   return `<div class="corner${c.closed ? " is-off" : ""}${c.featured && !c.closed ? " is-featured" : ""}">
-    ${c.name ? `<div class="corner-name">${esc(c.name)}</div>` : ""}
-    ${featuredBadge(c)}
+    ${c.name || c.featured ? `<div class="corner-heading">${c.name ? `<span class="corner-name">${esc(c.name)}</span>` : ""}${featuredBadge(c)}</div>` : ""}
     <div class="main">${c.closed ? "운영 없음" : pretty(main)}</div>
     ${!c.closed && sides.length ? `<ul class="sides">${sides.map((s) => `<li>${pretty(s)}</li>`).join("")}</ul>` : ""}
   </div>`;

@@ -223,8 +223,8 @@ function renderDays() {
     </button>`).join("");
 }
 
-// 대표 메뉴 = 첫 항목. 단, 김치류가 맨 앞에 오면(셀프코너) 그다음 항목을 대표로
-const BANCHAN = /^(포기김치|깍두기|김치|단무지|맛김치)/;
+// 대표 메뉴는 PDF의 첫 항목. 김치 반찬만 제외하고 김치찌개·깍두기볶음밥 같은 요리는 유지한다.
+const BANCHAN = /^(?:포기김치|깍두기|김치|단무지|맛김치)(?:\s*[/&]\s*(?:포기김치|깍두기|김치|단무지|맛김치))*\s*$/;
 function split(items) {
   const i = items.findIndex((t) => !BANCHAN.test(t));
   if (i <= 0) return [items[0], items.slice(1)];
